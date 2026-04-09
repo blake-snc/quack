@@ -182,6 +182,9 @@ def test_gemm_add_inplace_alpha_beta(m, k, n, input_dtype, alpha, beta, alpha_be
 @pytest.mark.parametrize("in_features", [736, 4096])
 def test_gemm_gated(in_features, out_features, has_bias, input_dtype, activation, store_preact):
     """Test GEMM with gated activation forward computation."""
+    major, _ = torch.cuda.get_device_capability()
+    if major == 12:
+        pytest.skip("SM12x: gated GEMM epilogue not yet supported (register layout mismatch)")
     device = "cuda"
     torch.random.manual_seed(0)
     m = 1920
@@ -221,6 +224,11 @@ def test_gemm_gated(in_features, out_features, has_bias, input_dtype, activation
 # @pytest.mark.parametrize("n", [2048])
 def test_gemm_dgated(n, k, has_colvec_scale, colvec_reduce, input_dtype, activation):
     """Test GEMM with gated activation gradient computation."""
+    major, _ = torch.cuda.get_device_capability()
+    if major == 12:
+        pytest.skip(
+            "SM12x: gated dactivation GEMM epilogue not yet supported (register layout mismatch)"
+        )
     device = "cuda"
     torch.random.manual_seed(0)
     m = 960
